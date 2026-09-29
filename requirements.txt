@@ -11,5 +11,6 @@ pandas>=2.2,<3.0
 sentence-transformers>=3.0,<6.0
 streamlit>=1.38,<2.0
 requests>=2.31,<3.0
+httpx2>=2.0,<3.0
 python-dotenv>=1.0,<2.0
 pytest>=8.0,<9.0
