@@ -1,0 +1,3 @@
+Data Scientist / ML Engineer
+
+We are looking for a candidate with Python, SQL, machine learning, NLP, PyTorch, Pandas, FastAPI, Git, Docker and AWS. The role involves building predictive models, evaluating experiments, developing REST APIs, working with data pipelines and communicating results.

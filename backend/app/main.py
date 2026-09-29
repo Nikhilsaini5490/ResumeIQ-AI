@@ -1,0 +1,81 @@
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from pydantic import BaseModel, Field
+
+from app.config import get_settings
+from app.services.analyzer import ResumeAnalyzer
+from app.services.parser import DocumentParser
+from app.services.rag import ResumeRAG
+
+app = FastAPI(title="ResumeIQ API", version="1.0.0")
+_analyzer = ResumeAnalyzer()
+
+
+class AnalyzeRequest(BaseModel):
+    resume_text: str = Field(min_length=20)
+    job_description: str = Field(min_length=20)
+
+
+class QuestionRequest(BaseModel):
+    resume_text: str = Field(min_length=20)
+    job_description: str = Field(min_length=20)
+    question: str = Field(min_length=3)
+
+
+@app.get("/")
+def root():
+    s = get_settings()
+    return {
+        "name": "ResumeIQ API",
+        "status": "ok",
+        "embeddings_enabled": s.use_embeddings,
+        "ollama_enabled": s.use_ollama,
+    }
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
+
+@app.post("/analyze")
+def analyze(request: AnalyzeRequest):
+    try:
+        return _analyzer.analyze(request.resume_text, request.job_description)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/analyze-file")
+async def analyze_file(
+    resume: UploadFile = File(...),
+    job_description: str = Form(...),
+):
+    try:
+        data = await resume.read()
+        text = DocumentParser.parse_bytes(resume.filename or "resume.txt", data)
+        if len(text.strip()) < 20:
+            raise HTTPException(
+                status_code=400,
+                detail="Could not extract enough text from the resume. Please upload a readable document.",
+            )
+        if len(job_description.strip()) < 20:
+            raise HTTPException(
+                status_code=400,
+                detail="Job description must contain at least 20 characters.",
+            )
+        return _analyzer.analyze(text, job_description)
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/ask")
+def ask(request: QuestionRequest):
+    try:
+        rag = ResumeRAG(request.resume_text, request.job_description)
+        return {"answer": rag.answer(request.question), "question": request.question}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

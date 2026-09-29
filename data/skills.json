@@ -1,0 +1,70 @@
+{
+  "programming": {
+    "Python": ["python3"],
+    "C++": ["cpp"],
+    "C": [],
+    "Java": ["java se"],
+    "JavaScript": ["js"],
+    "TypeScript": ["ts"],
+    "SQL": ["structured query language"]
+  },
+  "data_science": {
+    "Machine Learning": ["machine-learning", "ml"],
+    "Deep Learning": ["deep-learning", "dl"],
+    "Natural Language Processing": ["nlp", "natural-language processing"],
+    "Data Analysis": ["data analytics", "analytics"],
+    "Statistics": ["statistical analysis"],
+    "Computer Vision": ["cv", "computer-vision"],
+    "Generative AI": ["genai", "generative-ai"],
+    "Large Language Models": ["llm", "large-language model", "large language model"]
+  },
+  "ml_frameworks": {
+    "PyTorch": ["pytorch"],
+    "TensorFlow": ["tensorflow"],
+    "Scikit-learn": ["sklearn", "scikit learn"],
+    "XGBoost": ["xgboost"],
+    "LightGBM": ["lightgbm"],
+    "Hugging Face": ["huggingface", "transformers"]
+  },
+  "backend": {
+    "FastAPI": ["fast api"],
+    "Flask": ["flask"],
+    "Django": ["django"],
+    "REST API": ["restful api", "rest api", "rest"],
+    "GraphQL": ["graphql"]
+  },
+  "databases": {
+    "MySQL": [],
+    "PostgreSQL": ["postgres"],
+    "MongoDB": ["mongo"],
+    "SQLite": [],
+    "Redis": []
+  },
+  "cloud_devops": {
+    "AWS": ["amazon web services"],
+    "Azure": [],
+    "GCP": ["google cloud", "google cloud platform"],
+    "Docker": ["docker container"],
+    "Kubernetes": ["k8s"],
+    "Git": ["git scm"],
+    "GitHub": [],
+    "CI/CD": ["cicd", "continuous integration", "continuous deployment"]
+  },
+  "data_tools": {
+    "Pandas": ["pandas"],
+    "NumPy": ["numpy"],
+    "Matplotlib": ["matplotlib"],
+    "Seaborn": ["seaborn"],
+    "Apache Spark": ["spark", "pyspark"],
+    "Power BI": ["powerbi"],
+    "Tableau": ["tableau"]
+  },
+  "core": {
+    "Data Structures and Algorithms": ["dsa", "data structures", "algorithms"],
+    "Object-Oriented Programming": ["oop", "object oriented programming"],
+    "Operating Systems": ["os"],
+    "DBMS": ["database management systems"],
+    "Computer Networks": ["networks"],
+    "System Design": ["system-design", "system design"]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "ResumeIQ",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  "containerEnv": {
+    "USE_EMBEDDINGS": "false",
+    "RESUMEIQ_API": "http://127.0.0.1:8000"
+  },
+  "postCreateCommand": "grep -v '^sentence-transformers' requirements.txt > /tmp/resumeiq-requirements.txt && python -m pip install --no-cache-dir -r /tmp/resumeiq-requirements.txt",
+  "postStartCommand": "bash .devcontainer/start.sh",
+  "forwardPorts": [8000, 8501],
+  "portsAttributes": {
+    "8000": {
+      "label": "ResumeIQ API",
+      "onAutoForward": "silent"
+    },
+    "8501": {
+      "label": "ResumeIQ Dashboard",
+      "onAutoForward": "openBrowser"
+    }
+  }
+}

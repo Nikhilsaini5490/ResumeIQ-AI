@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.streamlit/
+*.log
+.DS_Store
+sample_resume.txt
