@@ -1,194 +1,112 @@
-# ResumeIQ — AI-Powered Resume Intelligence & Job Matching
+# ResumeIQ
 
-A placement-ready NLP project for analyzing a resume against a job description.
-It combines classic NLP, transformer embeddings, explainable scoring, skill-gap analysis, and an optional local LLM/RAG interview assistant.
+[![CI](https://github.com/Nikhilsaini5490/ResumeIQ-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nikhilsaini5490/ResumeIQ-AI/actions/workflows/ci.yml)
 
-## What this project does
+ResumeIQ compares a resume with a job description and reports an explainable match score, skill gaps, and interview-preparation suggestions. It uses a Streamlit interface and a FastAPI backend.
 
-1. Upload a PDF/DOCX/TXT resume.
-2. Extract text and identify resume sections.
-3. Extract technical and professional skills.
-4. Enter or paste a job description.
-5. Compare resume and job description with:
-   - keyword/skill overlap
-   - TF-IDF cosine similarity
-   - transformer sentence embeddings (optional but recommended)
-6. Produce an explainable Resume Match Score.
-7. Show matched skills and skill gaps.
-8. Analyze project/experience relevance.
-9. Generate improvement suggestions.
-10. Run a lightweight RAG-style interview assistant from the resume + job description.
-11. Export the analysis as JSON.
+The score is a project-defined metric, not an official ATS score or a hiring recommendation.
 
-## Architecture
+## Features
+
+- Parse PDF, DOCX, TXT, and Markdown resumes.
+- Identify resume sections and catalogued skills.
+- Compare documents with TF-IDF and optional sentence-transformer embeddings.
+- Show a weighted score breakdown, matched skills, skill gaps, and recommendations.
+- Retrieve resume and job-description context for interview questions, with an optional Ollama integration.
+- Export analysis results as JSON.
+
+## Project layout
 
 ```text
-Resume PDF/DOCX/TXT
-        |
-        v
-+-------------------+
-| Document Parser   |
-+-------------------+
-        |
-        v
-+-------------------+
-| NLP Preprocessing |
-+-------------------+
-        |
-        +------------------+
-        |                  |
-        v                  v
-  Section Split      Skill Extraction
-        |                  |
-        +--------+---------+
-                 |
-                 v
-        +----------------+
-        | Matching Engine |
-        +----------------+
-          /       |       \
-         /        |        \
-        v         v         v
-    TF-IDF   Embeddings   Skill Match
-       \         |          /
-        \        |         /
-         +-------+--------+
-                 |
-                 v
-        +----------------+
-        | Explainable    |
-        | Scoring Engine |
-        +----------------+
-                 |
-        +---------+---------+
-        |         |         |
-        v         v         v
-      Score    Skill Gaps  Suggestions
-                 |
-                 v
-          RAG Interview QA
-                 |
-                 v
-            Streamlit UI
+backend/       FastAPI API and analysis services
+data/          Skill taxonomy
+docs/          Project report and presentation outline
+frontend/      Streamlit dashboard
+tests/         Automated tests
+.devcontainer/ GitHub Codespaces setup
 ```
 
-## Recommended environment
+## Run locally on Windows
 
-- Windows 10/11
-- Python 3.11 recommended
-- Visual Studio Code
-- 8 GB RAM minimum; 16 GB is more comfortable
-- Internet connection for the first download of the sentence-transformer model
-
-## 1. Open the project in VS Code
-
-Extract the ZIP, then open the `ResumeIQ` folder in VS Code.
-
-Open the VS Code terminal and run:
+Use Python 3.11. From the repository root, create an environment and install dependencies:
 
 ```powershell
-python --version
-python -m venv .venv
+py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-If PowerShell blocks activation, use:
+Start the API in one terminal:
 
 ```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --reload --port 8000
 ```
 
-Then activate again.
-
-## 2. Run the backend
-
-From the project root:
+Start the dashboard in a second terminal:
 
 ```powershell
-cd backend
-..\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+.\.venv\Scripts\python.exe -m streamlit run frontend/app.py
 ```
 
-Open:
+Open the dashboard at `http://127.0.0.1:8501` and the API documentation at `http://127.0.0.1:8000/docs`.
 
-`http://127.0.0.1:8000/docs`
+If PowerShell blocks virtual-environment activation, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`, then activate again.
 
-You should see the FastAPI Swagger documentation.
+## Run with Docker Compose
 
-## 3. Run the frontend
-
-Open a second VS Code terminal in the project root:
+With Docker Desktop running:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-streamlit run frontend/app.py
+docker compose up --build
 ```
 
-The browser will open the ResumeIQ dashboard.
-
-## 4. Optional: enable transformer embeddings
-
-Embeddings are enabled by default. The first analysis downloads the model:
-
-`sentence-transformers/all-MiniLM-L6-v2`
-
-If you have a machine without internet, the project automatically falls back to TF-IDF when embedding loading fails.
-
-You can also force TF-IDF only by creating a `.env` file:
-
-```env
-USE_EMBEDDINGS=false
-```
-
-## 5. Optional: enable local LLM interview assistant
-
-The project can work completely without an LLM. For a stronger demo, install Ollama separately and make a local model available, then set:
-
-```env
-USE_OLLAMA=true
-OLLAMA_URL=http://127.0.0.1:11434/api/generate
-OLLAMA_MODEL=llama3.2
-```
-
-When Ollama is unavailable, the system uses a deterministic fallback interview generator, so the main application still runs.
-
-## 6. How to demo it in class
-
-1. Upload a resume.
-2. Paste a Data Scientist / ML Engineer job description.
-3. Click **Analyze Resume**.
-4. Show the overall match score.
-5. Show matched and missing skills.
-6. Compare TF-IDF and transformer semantic similarity.
-7. Show why the score was assigned.
-8. Show personalized recommendations.
-9. Open the interview assistant and ask:
-   - What can I be asked about my projects?
-   - What skills am I missing?
-   - What should I prepare for this job?
-
-## 7. Suggested academic contribution
-
-For your report, evaluate the system with a small labelled dataset of resume/job-description pairs. Compare:
-
-- keyword matching
-- TF-IDF cosine similarity
-- transformer embedding similarity
-
-For skill extraction evaluate precision, recall and F1-score. For matching scores, compare model scores to human annotations.
-
-## 8. Important project limitation
-
-The Resume Match Score is a project-defined metric, not an official ATS score. It should be described as an explainable matching score in your report and presentation.
-
-## 9. Resume bullet after you actually build/evaluate it
-
-- Built ResumeIQ, an NLP-based resume intelligence platform using TF-IDF, transformer embeddings, skill extraction, FastAPI, and an explainable job-matching pipeline with personalized skill-gap and interview recommendations.
-
-Add numerical performance claims only after you measure them on your own evaluation dataset.
+Open `http://127.0.0.1:8501`. The frontend waits for the backend health check before starting.
 
 ## Run in GitHub Codespaces
 
-Open this repository in a Codespace. The development container installs the application dependencies, starts the FastAPI backend and Streamlit dashboard, and forwards ports 8000 and 8501. Open the forwarded port labeled **ResumeIQ Dashboard** to use the app. Transformer embeddings are disabled in the Codespace by default; the app uses TF-IDF and does not download a model.
+On the repository page, choose **Code**, then **Codespaces**, then **Create codespace on main**. The dev container installs the non-transformer dependencies, starts both services, and forwards ports 8000 and 8501. Open the forwarded **ResumeIQ Dashboard** port. Codespaces usage is subject to the account's GitHub plan and billing settings.
+
+Codespaces uses TF-IDF by default to avoid downloading a transformer model. The local and Docker configurations can use embeddings when enabled.
+
+## Configuration
+
+Copy `.env.example` to `.env` in the repository root to customize settings.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `USE_EMBEDDINGS` | `true` | Enable sentence-transformer similarity. The model may download on first use. |
+| `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Sentence-transformer model name. |
+| `USE_OLLAMA` | `false` | Enable the optional Ollama interview assistant. |
+| `OLLAMA_URL` | `http://127.0.0.1:11434/api/generate` | Ollama generation endpoint. |
+| `OLLAMA_MODEL` | `llama3.2` | Ollama model name. |
+| `MAX_TEXT_CHARS` | `20000` | Maximum length for each resume, job-description, or question input. |
+
+When embeddings are disabled or unavailable, matching falls back to TF-IDF. The interview assistant also has a deterministic fallback when Ollama is disabled or unavailable.
+
+## API
+
+- `GET /health` reports API health.
+- `POST /analyze` accepts resume and job-description text as JSON.
+- `POST /analyze-file` accepts a resume upload and job description as multipart form data.
+- `POST /ask` retrieves relevant context and answers an interview-preparation question.
+
+Interactive request schemas are available at `/docs` when the API is running.
+
+## Tests
+
+The tests use the TF-IDF path and do not require a model download:
+
+```powershell
+$env:USE_EMBEDDINGS = "false"
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+GitHub Actions runs the test suite on pushes and pull requests to `main`.
+
+## Privacy and limitations
+
+- The API does not write uploaded resumes to a database or disk. The dashboard keeps the returned analysis in the user's Streamlit session.
+- The optional Ollama integration sends retrieved context to the configured Ollama endpoint. Use only endpoints you trust.
+- ResumeIQ is a prototype. Review the scoring logic and privacy requirements before using it with real candidate data or making employment decisions.
+- No license has been selected for this repository. Add a license before granting others reuse rights.

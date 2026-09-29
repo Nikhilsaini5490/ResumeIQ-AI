@@ -7,12 +7,18 @@ ROOT = Path(__file__).resolve().parents[1]
 BACKEND = ROOT / "backend"
 sys.path.insert(0, str(BACKEND))
 
+from app.config import get_settings
 from app.main import app
 from app.services.sections import split_sections
 from app.services.skills import extract_skills, flatten_skills
 from app.services.matcher import MatchingService
 
 client = TestClient(app)
+
+
+def text_over_limit():
+    max_chars = get_settings().max_text_chars
+    return "Python " * (max_chars // len("Python ") + 1)
 
 
 def test_section_split():
@@ -57,3 +63,36 @@ def test_analyze_file_rejects_short_job_description():
     )
     assert response.status_code == 400
     assert "at least 20 characters" in response.json()["detail"]
+
+
+def test_analyze_rejects_text_over_configured_limit():
+    response = client.post(
+        "/analyze",
+        json={
+            "resume_text": text_over_limit(),
+            "job_description": "Python developer with machine learning experience.",
+        },
+    )
+    assert response.status_code == 413
+    assert "configured limit" in response.json()["detail"]
+
+
+def test_analyze_file_rejects_text_over_configured_limit():
+    response = client.post(
+        "/analyze-file",
+        files={"resume": ("resume.txt", text_over_limit().encode(), "text/plain")},
+        data={"job_description": "Python developer with machine learning experience."},
+    )
+    assert response.status_code == 413
+
+
+def test_ask_rejects_text_over_configured_limit():
+    response = client.post(
+        "/ask",
+        json={
+            "resume_text": text_over_limit(),
+            "job_description": "Python developer with machine learning experience.",
+            "question": "What should I prepare?",
+        },
+    )
+    assert response.status_code == 413

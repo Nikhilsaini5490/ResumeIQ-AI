@@ -21,6 +21,15 @@ class QuestionRequest(BaseModel):
     question: str = Field(min_length=3)
 
 
+def _validate_text_size(label: str, text: str) -> None:
+    max_chars = get_settings().max_text_chars
+    if len(text) > max_chars:
+        raise HTTPException(
+            status_code=413,
+            detail=f"{label} exceeds the configured limit of {max_chars} characters.",
+        )
+
+
 @app.get("/")
 def root():
     s = get_settings()
@@ -39,6 +48,8 @@ def health():
 
 @app.post("/analyze")
 def analyze(request: AnalyzeRequest):
+    _validate_text_size("Resume text", request.resume_text)
+    _validate_text_size("Job description", request.job_description)
     try:
         return _analyzer.analyze(request.resume_text, request.job_description)
     except Exception as exc:
@@ -53,6 +64,8 @@ async def analyze_file(
     try:
         data = await resume.read()
         text = DocumentParser.parse_bytes(resume.filename or "resume.txt", data)
+        _validate_text_size("Resume text", text)
+        _validate_text_size("Job description", job_description)
         if len(text.strip()) < 20:
             raise HTTPException(
                 status_code=400,
@@ -74,6 +87,9 @@ async def analyze_file(
 
 @app.post("/ask")
 def ask(request: QuestionRequest):
+    _validate_text_size("Resume text", request.resume_text)
+    _validate_text_size("Job description", request.job_description)
+    _validate_text_size("Question", request.question)
     try:
         rag = ResumeRAG(request.resume_text, request.job_description)
         return {"answer": rag.answer(request.question), "question": request.question}
